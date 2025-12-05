@@ -149,31 +149,6 @@ class Trainer:
                 loss.backward()
                 self.losses.update(loss.item(), images.size(0))
                 self.optimizer.step()
-                # ----------------------------
-                # CHECKPOINT SAVE BLOCK
-                # ----------------------------
-
-                # iteration은 0부터 시작하므로 +1
-                iter_num = iteration + 1
-
-                # 매 100 iteration마다 저장
-                if iter_num % 100 == 0:
-                    ckpt_dir = Path("checkpoints")
-                    ckpt_dir.mkdir(exist_ok=True)
-
-                    ckpt_path = ckpt_dir / f"split{self.split}_iter{iter_num}.pth"
-                    torch.save(self.model.state_dict(), ckpt_path)
-                    print(f"[INFO] Saved checkpoint → {ckpt_path}")
-
-                # 마지막 iteration에서 최종본 저장
-                if iter_num == self.iterations:
-                    ckpt_dir = Path("checkpoints")
-                    ckpt_dir.mkdir(exist_ok=True)
-
-                    final_path = ckpt_dir / f"split{self.split}_final.pth"
-                    torch.save(self.model.state_dict(), final_path)
-                    print(f"[INFO] Saved FINAL checkpoint → {final_path}")
-                # ----------------------------
                 if i % max(1, args.it_save // 4) == 0 or args.debug:
                     print(f"Iteration: {i}\tLoss: {self.losses.val:.4f} (avg {self.losses.avg:.4f})")
                 i += 1
