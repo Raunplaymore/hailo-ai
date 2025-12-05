@@ -1,10 +1,4 @@
-"""GolfDB dataset utilities for training and evaluation.
-
-This module exposes:
-- GolfDB: torch Dataset for loading preprocessed GolfDB clips.
-- ToTensor: transform to convert ndarray frames to float tensors.
-- Normalize: transform using channel-wise mean/std.
-"""
+"""GolfDB dataset utilities for training and evaluation."""
 
 from __future__ import annotations
 
@@ -53,7 +47,7 @@ class GolfDB(Dataset):
     def __getitem__(self, idx: int) -> dict:
         ann = self.df.loc[idx, :]  # annotation info
         events = ann["events"]
-        events -= events[0]  # frame numbers correspond to preprocessed clip
+        events -= events[0]  # align to clip start
 
         images, labels = [], []
         cap = cv2.VideoCapture(str(self.vid_dir / f"{ann['id']}.mp4"))
@@ -95,6 +89,10 @@ class GolfDB(Dataset):
         return sample
 
 
+# alias for backward compatibility
+GolfDBDataset = GolfDB
+
+
 class ToTensor:
     """Convert ndarrays in sample to PyTorch tensors (N, H, W, C) -> (N, C, H, W)."""
 
@@ -118,5 +116,7 @@ class Normalize:
         images, labels = sample["images"], sample["labels"]
         images.sub_(self.mean[None, :, None, None]).div_(self.std[None, :, None, None])
         return {"images": images, "labels": labels}
-       
+
+
+__all__ = ["GolfDB", "GolfDBDataset", "ToTensor", "Normalize"]
 
