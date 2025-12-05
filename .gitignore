@@ -1,0 +1,12 @@
+# Python/venv
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Data artifacts (keep repo lean)
+data/golf_db/*.pkl
+data/golf_db/videos_160/
+data/golf_db/*.mp4
+data/golf_db/*.avi
+data/golf_db/*.mkv
