@@ -58,8 +58,9 @@ def build_dataloader(
     train: bool,
     subset_size: int | None = None,
 ) -> Tuple[DataLoader, torch.Tensor]:
-    data_file = get_data_path(f"train_split_{split}.pkl" if train else f"test_split_{split}.pkl")
-    vid_dir = get_data_path("videos_160")
+    split_root = get_data_path("golf_db")
+    data_file = split_root / f"train_split_{split}.pkl" if train else f"test_split_{split}.pkl"
+    vid_dir = split_root / "videos_160"
     norm = Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # ImageNet mean/std
     dataset = GolfDB(
         data_file=data_file,
