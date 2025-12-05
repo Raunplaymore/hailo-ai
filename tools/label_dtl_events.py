@@ -80,6 +80,19 @@ def main() -> None:
 
     labels: Dict[str, Optional[int]] = {name: None for name in ["address", "top", "impact", "finish"]}
 
+    out_path = Path(args.output)
+    if out_path.exists():
+        try:
+            with open(out_path, "r", encoding="utf-8") as f:
+                prev = json.load(f)
+            prev_labels = prev.get("events", {})
+            for k in labels.keys():
+                if k in prev_labels and isinstance(prev_labels[k], int):
+                    labels[k] = prev_labels[k]
+            print(f"[INFO] Loaded existing labels from {out_path}: {labels}")
+        except Exception as e:
+            print(f"[WARN] Could not load existing label file ({e}). Starting fresh.")
+
     while True:
         frame = read_frame(cap, current_idx)
         if frame is None:
@@ -90,7 +103,7 @@ def main() -> None:
         cv2.imshow("DTL Labeler", frame)
         key = cv2.waitKey(0)
 
-        if key == ord("q"):
+        if key in (ord("q"), 27):
             print("Quit without saving.")
             break
         elif key in (13, 32):  # Enter or Space
@@ -121,6 +134,9 @@ def main() -> None:
             current_idx = min(current_idx + 10, total_frames - 1)
         elif key == ord("s"):
             current_idx = max(current_idx - 10, 0)
+        elif key == ord("r"):
+            labels = {name: None for name in labels}
+            print("Reset all labels.")
         else:
             # Unmapped key, ignore and continue
             pass

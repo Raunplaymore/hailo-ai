@@ -138,8 +138,47 @@ python inference.py --video data/test_video.mp4 --checkpoint checkpoints/split1_
 
 ## Roadmap
 
-- [ ] YOLO 기반 공/클럽 트래킹 통합
-- [ ] ConvNeXt + Transformer 기반 EventDetector 도입
-- [ ] Hailo-8 / Raspberry Pi 5용 경량 추론 파이프라인 추가
-- [ ] 실제 골프 스윙 데이터(Down-the-line, face-on) 지원
-- [ ] 테스트/CI에서 기본 학습 스모크 테스트 자동화
+- YOLO 기반 공/클럽 트래킹 통합
+- ConvNeXt + Transformer 기반 EventDetector 도입
+- Hailo-8 / Raspberry Pi 5용 경량 추론 파이프라인 추가
+- 실제 골프 스윙 데이터(Down-the-line, face-on) 지원
+- 테스트/CI에서 기본 학습 스모크 테스트 자동화
+
+## DTL (Down-the-Line) 이벤트 라벨링 가이드
+
+- **영상/라벨 위치**  
+  - 원본: `data/dtl_raw/` (예: `dtl_001.mp4`, `dtl_002.mp4` …)  
+  - 라벨: `data/dtl_labels/` (JSON)
+- **이벤트 정의** (단일 프레임 인덱스)  
+  `address`, `top`, `impact`, `finish`
+- **라벨러 실행** (`tools/label_dtl_events.py`)  
+  ```bash
+  python tools/label_dtl_events.py \
+    --video data/dtl_raw/dtl_001.mp4 \
+    --output data/dtl_labels/dtl_001.json
+  ```
+  조작: `a/d`(±1), `s/w`(±10), `1~4`(이벤트 설정), `space/enter`(4개 설정 시 저장), `q`(저장 없이 종료)
+- **JSON 예시**
+  ```json
+  {
+    "video": "dtl_001.mp4",
+    "fps": 60.0,
+    "num_frames": 240,
+    "events": {
+      "address": 10,
+      "top": 115,
+      "impact": 150,
+      "finish": 210
+    }
+  }
+  ```
+- **워크플로우**  
+  영상 수집 → `data/dtl_raw/` 저장 → 라벨러로 4 이벤트 지정 → JSON 확인/수정 → `data/dtl_labels/`에 축적 → DTL 전용 데이터셋/모델 파인튜닝  
+  (라벨 5~10개만 있어도 초기 모델 가능, 늘릴수록 성능 안정화)
+
+### DTL 후속 아이디어
+
+- GolfDTLDataset 구현 → JSON 기반 로더
+- 기존 EventDetector에 DTL 파인튜닝 스크립트 추가 (예: `train_dtl.py`)
+- DTL 전용 temporal smoothing/GRU 확장
+- Hailo 가속 버전으로 변환해 Pi 디바이스 실시간 실행
