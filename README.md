@@ -15,7 +15,7 @@
 - `configs/`: 실험/학습 설정 YAML. 여러 실험을 구성 파일로 관리.
 - `requirements.txt`: Colab/로컬 공용 파이썬 의존성 목록.
 - `README.md`: 프로젝트 개요와 Colab 실행 가이드.
-- `train.py`: 공용 학습 엔트리포인트. `--debug`로 소규모 디버깅 모드 지원.
+- `train.py`: 공용 학습 엔트리포인트. `--debug`로 소규모 디버깅 모드 지원. `golfDB.pkl`을 내부 80/20으로 나눠 학습/검증에 사용.
 
 ```text
 Raw Video
@@ -88,8 +88,8 @@ except ImportError:
 ## 학습 실행 예시
 
 ```bash
-# 기본 학습
-python train.py --split 1 --iterations 2000
+# 기본 학습 (golfDB.pkl을 내부 80/20으로 분할)
+python train.py --iterations 2000
 
 # 로컬 디버깅(작은 데이터/짧은 반복/더 잦은 로그)
 python train.py --debug
@@ -97,11 +97,19 @@ python train.py --debug
 # 사전학습 미사용 + 가중치 경로 지정
 python train.py --no-pretrain --weights-path /path/to/mobilenet_v2.pth.tar
 
-# 설정 파일 기반 실행 (여러 실험을 configs/에 관리)
-python train.py --config configs/example.yaml
+# (선택) 데이터 루트 지정: 기본은 data/ (Colab은 /content/hailo-ai/data)
+# export DATA_ROOT=/content/hailo-ai/data/golf_db
 ```
 
-`configs/`에 실험별 YAML을 두고 `--config`로 선택하면, 동일 코드로 여러 실험 설정을 버전 관리하기 쉽습니다.
+## 평가/추론 실행 예시
+
+```bash
+# 평가 (val_split_{n}.pkl 사용)
+python eval.py --split 1 --checkpoint checkpoints/split1_iter2000.pth
+
+# 비디오 추론 (프레임별 클래스/확률 출력)
+python inference.py --video data/test_video.mp4 --checkpoint checkpoints/split1_iter2000.pth
+```
 
 ## 경로/환경 헬퍼
 
@@ -118,9 +126,9 @@ python train.py --config configs/example.yaml
 
 ## Dataset 준비 (GolfDB)
 
-- `data/golf_db/golfDB.mat` 위치에 GolfDB annotation 파일을 두면 됩니다.
+- `data/golf_db/golfDB.mat` 또는 `golfDB.pkl` 위치에 GolfDB annotation 파일을 두면 됩니다.
 - 비디오 프레임/클립 데이터는 선택 사항이며, YOLO 기반 트래킹이나 시각화에 사용할 수 있습니다.
-- 내부 경로 헬퍼(`src/utils/paths.py`)는 기본적으로 `data/` 아래를 루트로 가정합니다.
+- 내부 경로 헬퍼(`src/utils/paths.py`)는 기본적으로 `data/` 아래를 루트로 가정합니다(필요 시 `DATA_ROOT`로 오버라이드, 예: `DATA_ROOT=/content/hailo-ai/data/golf_db`).
 
 ## 다음에 할 일 아이디어
 
