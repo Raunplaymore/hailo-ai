@@ -2,10 +2,10 @@
 __pycache__/
 *.pyc
 .venv/
+.venv311/
 venv/
 
 # Data artifacts (keep repo lean)
-data/golf_db/*.pkl
 data/golf_db/videos_160/
 data/golf_db/*.mp4
 data/golf_db/*.avi
