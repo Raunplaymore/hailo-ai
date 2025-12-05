@@ -104,7 +104,8 @@ python train.py --config configs/example.yaml
 `configs/`에 실험별 YAML을 두고 `--config`로 선택하면, 동일 코드로 여러 실험 설정을 버전 관리하기 쉽습니다.
 
 ## 경로/환경 헬퍼
-- 데이터 루트: `get_data_root()`는 Colab이면 `/content/golf-ai/data`, 로컬이면 `<프로젝트>/data`를 기본으로 사용 (`DATA_ROOT` 환경변수로 오버라이드 가능).
+
+- 데이터 루트: `get_data_root()`는 Colab이면 `/content/hailo-ai/data`, 로컬이면 `<프로젝트>/data`를 기본으로 사용 (`DATA_ROOT` 환경변수로 오버라이드 가능).
 - 하위 경로: `get_data_path("videos_160")`처럼 호출해 상대 경로를 조합.
 
 ## 로컬 개발 메모 (VS Code)

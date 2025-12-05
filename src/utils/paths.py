@@ -25,7 +25,7 @@ def get_data_root() -> Path:
 
     Priority:
     1) DATA_ROOT environment variable
-    2) Colab default: /content/golf-ai/data
+    2) Colab default: /content/hailo-ai/data
     3) Local default: <project_root>/data
     """
     env_override = os.environ.get("DATA_ROOT")
@@ -33,7 +33,7 @@ def get_data_root() -> Path:
         return Path(env_override).expanduser().resolve()
 
     if _is_colab():
-        return Path("/content/golf-ai/data")
+        return Path("/content/hailo-ai/data")
 
     project_root = Path(__file__).resolve().parents[2]
     return project_root / "data"
