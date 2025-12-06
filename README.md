@@ -97,6 +97,10 @@ python train.py --debug
 # 사전학습 미사용 + 가중치 경로 지정
 python train.py --no-pretrain --weights-path /path/to/mobilenet_v2.pth.tar
 
+# 체크포인트에서 이어서 학습
+python train.py --iterations 2000 --resume checkpoints/split1_iter1200.pth.tar
+# (모델 state_dict만 있는 .pth도 지원, 파일명에서 iter 숫자를 추출해 이어서 진행)
+
 # (선택) 데이터 루트 지정: 기본은 data/ (Colab은 /content/hailo-ai/data)
 # export DATA_ROOT=/content/hailo-ai/data/golf_db
 ```

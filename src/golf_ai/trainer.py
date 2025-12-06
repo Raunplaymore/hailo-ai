@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 from typing import Tuple
+import re
 
 import torch
 from torch.utils.data import DataLoader
@@ -38,6 +39,12 @@ def parse_args() -> argparse.Namespace:
         "--debug",
         action="store_true",
         help="Use small subset, fewer iterations/steps, and verbose logging for local debugging",
+    )
+    parser.add_argument(  # ← 여기 추가
+        "--resume",
+        type=str,
+        default=None,
+        help="Path to checkpoint (.pth or .pth.tar) to resume training from",
     )
     return parser.parse_args()
 
@@ -138,8 +145,39 @@ class Trainer:
         self.models_dir = Path("models")
         self.models_dir.mkdir(exist_ok=True)
 
+        self.start_iter = 0
+        if args.resume is not None:
+            ckpt_path = Path(args.resume)
+            if not ckpt_path.exists():
+                raise FileNotFoundError(f"Resume checkpoint not found: {ckpt_path}")
+            print(f"[INFO] Loading checkpoint from: {ckpt_path}")
+
+            ckpt = torch.load(ckpt_path, map_location=self.device)
+
+            # swingnet_XXXX.pth.tar 형식 (dict) 지원
+            if isinstance(ckpt, dict) and "model_state_dict" in ckpt:
+                self.model.load_state_dict(ckpt["model_state_dict"])
+                if "optimizer_state_dict" in ckpt:
+                    try:
+                        self.optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+                        print("[INFO] Optimizer state loaded from checkpoint.")
+                    except Exception as e:
+                        print(f"[WARN] Failed to load optimizer state: {e}")
+                self.start_iter = int(ckpt.get("iter", 0))
+                print(f"[INFO] Resuming from iteration {self.start_iter}")
+            else:
+                # 단순 state_dict(.pth) 형식도 지원
+                self.model.load_state_dict(ckpt)
+                # 파일명에서 iter 숫자 추출 (예: split1_iter1200.pth)
+                m = re.search(r"iter(\d+)", ckpt_path.stem)
+                if m:
+                    self.start_iter = int(m.group(1))
+                    print(f"[INFO] Resuming from iteration {self.start_iter} (parsed from filename)")
+                else:
+                    print("[WARN] Could not determine starting iteration. Starting from 0.")
+
     def run(self) -> None:
-        i = 0
+        i = self.start_iter
         args = self.args
         while i < args.iterations:
             for sample in self.loader:
