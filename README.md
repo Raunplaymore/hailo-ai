@@ -98,7 +98,7 @@ python train.py --debug
 python train.py --no-pretrain --weights-path /path/to/mobilenet_v2.pth.tar
 
 # 체크포인트에서 이어서 학습
-python train.py --iterations 2000 --resume checkpoints/split1_iter1200.pth.tar
+python train.py  --split 1 --iterations 2000 --resume checkpoints/split1_iter1200.pth.tar
 # (모델 state_dict만 있는 .pth도 지원, 파일명에서 iter 숫자를 추출해 이어서 진행)
 
 # (선택) 데이터 루트 지정: 기본은 data/ (Colab은 /content/hailo-ai/data)
@@ -150,12 +150,12 @@ python inference.py --video data/test_video.mp4 --checkpoint checkpoints/split1_
 
 ## DTL (Down-the-Line) 이벤트 라벨링 가이드
 
-- **영상/라벨 위치**  
-  - 원본: `data/dtl_raw/` (예: `dtl_001.mp4`, `dtl_002.mp4` …)  
+- **영상/라벨 위치**
+  - 원본: `data/dtl_raw/` (예: `dtl_001.mp4`, `dtl_002.mp4` …)
   - 라벨: `data/dtl_labels/` (JSON)
 - **이벤트 정의** (단일 프레임 인덱스)  
   `address`, `top`, `impact`, `finish`
-- **라벨러 실행** (`tools/label_dtl_events.py`)  
+- **라벨러 실행** (`tools/label_dtl_events.py`)
   ```bash
   python tools/label_dtl_events.py \
     --video data/dtl_raw/dtl_001.mp4 \
