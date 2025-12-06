@@ -59,9 +59,9 @@ def build_val_loader(split: int, device: torch.device) -> tuple[DataLoader, torc
     )
     loader = DataLoader(
         dataset,
-        batch_size=32,
+        batch_size=1,
         shuffle=False,
-        num_workers=2,
+        num_workers=0,
         drop_last=False,
         pin_memory=device.type == "cuda",
     )
